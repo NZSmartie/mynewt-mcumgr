@@ -26,7 +26,7 @@
 #include "log_mgmt/log_mgmt.h"
 #include "log_mgmt/log_mgmt_impl.h"
 #include "log_mgmt/log_mgmt_config.h"
-#include "log/log.h"
+#include "logging/log.h"
 
 /* Log mgmt encoder context used for multiple calls of the
  * entry encode function since the function gets called twice,
@@ -201,11 +201,7 @@ log_mgmt_cb_encode(struct log_mgmt_entry *entry, void *arg)
          */
 
         cbor_cnt_writer_init(&cnt_writer);
-#ifdef __ZEPHYR__
-        cbor_encoder_cust_writer_init(&cnt_encoder, &cnt_writer.enc, 0);
-#else
         cbor_encoder_init(&cnt_encoder, &cnt_writer.enc, 0);
-#endif
         rc = log_mgmt_encode_entry(&cnt_encoder, entry, &entry_len, lmec);
         if (rc != 0) {
             return rc;
@@ -223,7 +219,7 @@ log_mgmt_cb_encode(struct log_mgmt_entry *entry, void *arg)
              * message in the "msg" field of the response
              */
             if (ctxt->counter == 0) {
-                entry->type = LOG_ETYPE_STRING;
+                entry->type = LOG_MGMT_ETYPE_STRING;
                 snprintf((char *)entry->data, LOG_MGMT_MAX_RSP_LEN,
                          "error: entry too large (%zu bytes)", entry_len);
             }
@@ -288,6 +284,8 @@ log_encode_entries(const struct log_mgmt_log *log, CborEncoder *enc,
         .rsp_len = cbor_encode_bytes_written(enc),
     };
 
+    // TODO: Pass in the log_mgmt_log pointer instead of the name. Zephyr uses 
+    //       source indexes, requiring the impl to strcmp each log module name.
     rc = log_mgmt_impl_foreach_entry(log->name, &filter,
                                      log_mgmt_cb_encode, &ctxt);
     if (rc < 0) {
@@ -432,8 +430,8 @@ log_mgmt_show(struct mgmt_ctxt *ctxt)
                     goto err;
                 }
 
-                /* If the client specified this log, he isn't interested in the
-                 * remaining ones.
+                /* If the client specified this log, they are not interested in
+                 * the remaining ones.
                  */
                 if (name_len > 0) {
                     break;

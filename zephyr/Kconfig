@@ -1,0 +1,23 @@
+if MCUMGR
+
+config LOG_MGMT_MAX_RSP_LEN
+    int 
+    default 512
+
+config LOG_MGMT_LOG_QUEUE_SIZE
+    int
+    default 64
+
+config LOG_MGMT_LOG_TIMEOUT
+    int
+    default 300
+
+config LOG_MGMT_GLOBAL_IDX
+    int
+    default 0
+
+config LOG_MGMT_IMG_HASHLEN
+    int
+    default 4
+
+endif 

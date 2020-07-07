@@ -18,3 +18,4 @@
 
 build:
   cmake: .
+  kconfig: zephyr/Kconfig
